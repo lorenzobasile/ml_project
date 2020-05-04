@@ -2,8 +2,9 @@ library("corrplot")
 library("randomForest")
 library("caret")
 
-data <- read.csv("leaf-2/leaf.csv",header=F,sep = ",")
-colnames(data) <- c("Class","Specimen Number","Eccentricity","Aspect Ratio","Elongation","Solidity","Stochastic Convexity","Isoperimetric Factor","Maximal Indentation Depth","Lobedness","Average Intensity","Average Contrast","Smoothness","Third moment","Uniformity","Entropy")
+csv <- read.csv("leaf.csv",header=F,sep = ",")
+colnames(csv) <- c("Class","SpecimenNumber","Eccentricity","AspectRatio","Elongation","Solidity","StochasticConvexity","IsoperimetricFactor","Maximal IndentationDepth","Lobedness","AverageIntensity","AverageContrast","Smoothness","ThirdMoment","Uniformity","Entropy")
+data = subset(csv, select = -SpecimenNumber ) #il numero del campione non serve
 classes <- c(seq(1,40))
 classes %in% data$Class
 
@@ -21,20 +22,24 @@ set.seed(123)
 
 ind <- sample(2,nrow(data),replace=TRUE,prob=c(0.7,0.3))
 train <- data[ind==1,]
+
 #...and test data, which is the 30% of iris
 test <- data[ind==2,]
 
-rf.fit <- train(Class~., 
-                data=train, 
-                method = "rf",     # Use the "random forest" algorithm
-                importance = TRUE, # importance=TRUE allows to inspect variable importance
-                trControl = trainControl(method = "repeatedcv", # Use cross-validation
-                                         number = 5, # Use 10 folds for cross-validation
-                                         repeats = 5)
-)
+rf.fit <- train(Class ~ ., 
+                data=data, #per ora non facciamo tuning, quindi tutto train
+                method = "rf",
+                importance = TRUE,
+                trControl = trainControl(method = "repeatedcv",number = 5,repeats = 5) #non compila
+                tuneGrid = rfGrid,
+                verbose = FALSE,
+                # Additional parameters
+                ntree = 1500,
+                minsplit = 2,
+                metric = "Accuracy") #non rmse per classificazione
 
 rf.fit
 rf.fit$finalModel
 plot(varImp(rf.fit), top = 10)
 
-rf<-rf.crossValidation()
+#rf<-rf.crossValidation() non serve?
