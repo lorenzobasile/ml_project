@@ -30,28 +30,42 @@ rf_tab <- table(append((1:15), (22:36))) - table(append((1:15), (22:36)))
 rf_fpr <- array(0, dim = 30)
 rf_fnr <- array(0, dim = 30)
 
+acc_svmr <- array(NA,dim = 5)
+acc_svml <- array(NA,dim = 5)
+acc_svmp <- array(NA,dim = 5)
+fpr_svmr <- array(0, dim = 30)
+fnr_svmr <- array(0, dim = 30)
+fpr_svml <- array(0, dim = 30)
+fnr_svml <- array(0, dim = 30)
+fpr_svmp <- array(0, dim = 30)
+fnr_svmp <- array(0, dim = 30)
+
+b_acc <- array(NA,dim = 5)
+b_fpr <- array(0, dim = 30)
+b_fnr <- array(0, dim = 30)
+
+
 for (fold in 1:5) {
   # for each fold, split train-set
-  train_set <- data[data_folds$.folds != fold,]
+  training_set <- data[data_folds$.folds != fold,]
   test_set <- data[data_folds$.folds == fold,]
   
   # x_test, y_test
-  x_test<-test_set[2:15]
-  y_test<-test_set[[1]]
+  xtest<-test_set[2:15]
+  ytest<-test_set[[1]]
   
   # setting seed
-  set.seed(Sys.time())
+  set.seed(123)
   
   # preparing grid for our parameters
   rfGrid <- expand.grid(mtry = c(4:13))    # Usually 6~10
   
   # preparing fit procedure
-  fitControl <- trainControl(method = "cv",
-                             number = 5)
+  fitControl <- trainControl(method = "cv", number = 5, verboseIter = T)
   
   # fitting RF with cv over train_set and tuning mtry
   rF_fit <- train(Class ~ .,
-                  data = train_set,
+                  data = training_set,
                   method = "rf",
                   trControl = fitControl,
                   tuneGrid = rfGrid,
@@ -61,19 +75,63 @@ for (fold in 1:5) {
                   metric = "Accuracy")
   
   # predict over test set
-  ypred <- predict(rF_fit, mtry=rF_fit$finalModel$mtry,  x_test)
+  ypred <- predict(rF_fit, mtry=rF_fit$finalModel$mtry,  xtest)
   
   # accuracy
-  rf_acc[fold] <-sum((y_test == ypred)/length(y_test))
+  rf_acc[fold] <-sum((ytest == ypred)/length(ytest))
   
-  rf_tab <- rf_tab + table(y_test[(1:length(y_test))*(-((ypred == y_test) - 1))])
+  rf_tab <- rf_tab + table(ytest[(1:length(ytest))*(-((ypred == ytest) - 1))])
   
   
-  rf_fpr<- rf_fpr + ml_test(ypred,y_test,output.as.table = FALSE)$FPR
-  rf_fnr<- rf_fnr + ml_test(ypred,y_test,output.as.table = FALSE)$FNR
+  rf_fpr<- rf_fpr + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
+  rf_fnr<- rf_fnr + ml_test(ypred,ytest,output.as.table = FALSE)$FNR
+  
+  
+  #SVM
+  
+  #radial SVM
+  svmrGrid <- expand.grid(C = c(1, 1.5, 2, 2.5, 3, 3.5), sigma = c(0.1, 0.15, 0.2, 0.25, 0.3, 0.35))
+  svmrFit <- train(Class ~., data = training_set, method = "svmRadial", trControl = fitControl, tuneGrid = svmrGrid, metric = "Accuracy")
+  print(svmrFit)
+  ypred <- predict(svmrFit, C = svmrFit$finalModel$C,sigma = svmrFit$finalModel$sigma, xtest)
+  acc_svmr[fold] <- sum((ytest==ypred)/length(ytest))
+  fpr_svmr<- fpr_svmr + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
+  fnr_svmr<- fnr_svmr + ml_test(ypred,ytest,output.as.table = FALSE)$FNR 
+  
+  #linear SVM
+  
+  svmlGrid <- expand.grid(C = c(1, 1.5, 2, 2.5, 3, 3.5))
+  svmlFit <- train(Class ~., data = training_set, method = "svmLinear", trControl = fitControl, tuneGrid = svmlGrid, metric = "Accuracy")
+  print(svmlFit)
+  ypred <- predict(svmlFit, C = svmlFit$finalModel$C, xtest)
+  sum((ytest==ypred)/length(ytest))
+  acc_svml[fold] <- sum((ytest==ypred)/length(ytest))
+  fpr_svml<- fpr_svml + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
+  fnr_svml<- fnr_svml + ml_test(ypred,ytest,output.as.table = FALSE)$FNR 
+  
+  #polynomial SVM
+  
+  svmpGrid <- expand.grid(C = c(1, 1.5, 2, 2.5, 3, 3.5), scale = c(0.01, 0.05, 0.1, 0.15, 0.2, 0.3), degree=c(1,2,3,4))
+  svmpFit <- train(Class ~., data = training_set, method = "svmPoly", trControl = fitControl, tuneGrid = svmpGrid, metric = "Accuracy")
+  print(svmpFit)
+  ypred <- predict(svmpFit, C = svmpFit$finalModel$C,scale = svmpFit$finalModel$scale,degree = svmpFit$finalModel$degree, xtest)
+  acc_svmp[fold] <- sum((ytest==ypred)/length(ytest))
+  fpr_svmp<- fpr_svmp + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
+  fnr_svmp<- fnr_svmp + ml_test(ypred,ytest,output.as.table = FALSE)$FNR 
+  
+  #BOOSTING
+  
+  gbmGrid <- expand.grid(n.trees=100, interaction.depth=5, shrinkage=0.1, n.minobsinnode = 10)
+  gbmFit <- train(Class ~., data = training_set, method = "gbm", trControl = fitControl, tuneGrid = gbmGrid, metric = "Accuracy")
+  print(gbmFit)
+  ypred <- predict(gbmFit, n.trees = gbmFit$finalModel$n.trees, interaction.depth=gbmFit$finalModel$interaction.depth, shrinkage=gbmFit$finalModel$shrinkage, n.minobsinnode=gbmFit$finalModel$n.minobsinnode, xtest)
+  b_acc[fold] <- sum((ytest==ypred)/length(ytest))
+  b_fpr<- b_fpr + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
+  b_fnr<- b_fnr + ml_test(ypred,ytest,output.as.table = FALSE)$FNR
+  
   
 }
-
+#RF
 rf_fpr <- rf_fpr/5
 rf_fnr <- rf_fnr/5
 rf_FNR<-c(rf_fnr)
@@ -84,45 +142,47 @@ rf_final_acc
 Species <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36)
 rf_fpfn <- data.frame(Species, rf_FPR, rf_FNR)
 rf_fpfn
+#SVMR
+fpr_svmr <- fpr_svmr/5
+fnr_svmr <- fnr_svmr/5
+FNR_svmr<-c(fnr_svmr)
+FPR_svmr <- c(fnr_svmr)
+svmr_final_acc <- mean(acc_svmr)
+svmr_final_acc
 
+fpfn_svmr <- data.frame(Species, FPR_svmr, FNR_svmr)
+fpfn_svmr
+#SVML
+fpr_svml <- fpr_svml/5
+fnr_svml <- fnr_svml/5
+FNR_svml<-c(fnr_svml)
+FPR_svml <- c(fpr_svml)
+svml_final_acc <- mean(acc_svml)
+svml_final_acc
 
-#------------------------------------------------BOOSTING---------------------------------------------------
+fpfn_svml <- data.frame(Species, FPR_svml, FNR_svml)
+fpfn_svml
+#SVMP
+fpr_svmp <- fpr_svmp/5
+fnr_svmp <- fnr_svmp/5
+FNR_svmp<-c(fnr_svmp)
+FPR_svmp <- c(fpr_svmp)
+svmp_final_acc <- mean(acc_svmp)
+svmp_final_acc
 
-acc <- array(NA,dim = 5)
+fpfn_svmp <- data.frame(Species, FPR_svmp, FNR_svmp)
+fpfn_svmp
+#B
 
-fpr <- array(0, dim = 30)
-fnr <- array(0, dim = 30)
+b_final_acc <- mean(b_acc)
+b_final_acc
 
-for (fold in 1:5){
-  training_set <- data[data_folds$.folds != fold,]
-  testing_set <- data[data_folds$.folds == fold,]
-  
-  xtest<- testing_set[2:15]
-  ytest <- testing_set[[1]]
-
-  set.seed(2)
-  
-  fitControl <- trainControl(method = "cv",number = 5, verboseIter = T)
-  
-  gbmGrid <- expand.grid(n.trees=100, interaction.depth=5, shrinkage=0.1, n.minobsinnode = 10)
-  gbmFit <- train(Class ~., data = training_set, method = "gbm", trControl = fitControl, tuneGrid = gbmGrid, metric = "Accuracy")
-  print(gbmFit)
-  ypred <- predict(gbmFit, n.trees = gbmFit$finalModel$n.trees, interaction.depth=gbmFit$finalModel$interaction.depth, shrinkage=gbmFit$finalModel$shrinkage, n.minobsinnode=gbmFit$finalModel$n.minobsinnode, xtest)
-  acc[fold] <- sum((ytest==ypred)/length(ytest))
-  fpr<- fpr + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
-  fnr<- fnr + ml_test(ypred,ytest,output.as.table = FALSE)$FNR }
-
-final_acc <- mean(acc)
-final_acc
-
-fpr <- fpr/5
-fnr <- fnr/5
-FNR<-c(fnr)
-FPR <- c(fpr)
-Species <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36)
-fpfn <- data.frame(Species, FPR, FNR)
+b_fpr <- b_fpr/5
+b_fnr <- b_fnr/5
+b_FNR<-c(b_fnr)
+b_FPR <- c(b_fpr)
+fpfn <- data.frame(Species, b_FPR, b_FNR)
 fpfn
-
 plot(varImp(gbmFit))
 
 
