@@ -39,25 +39,24 @@
 
 
 \section{Problem statement}
-Leaf identification is the process of matching an unknown observed leaf to its proper scientific name. The development of computer technologies has increased the interest inside this field on automatic recognition systems in order to have an inexpensive and fast tool able to classify leaves.  
+Leaf identification is the process of matching an unknown observed leaf to its proper scientific name. The development of information technology has increased the interest inside this field on automatic recognition systems in order to have an inexpensive and fast tool able to classify leaves.  
 
-In this project our aim is to implement several supervised machine learning techniques that could develop a leaf classifier and propose the most effective one according to some performance indexes. \\
-The input of this problem is given by 14 morphological and textural features of a picture of the sample leaf and the output is a number associated to its relative species. The classifiers that we present have been trained on a data-set provided by \cite{silva} that comprises 40 different plant species that has already been pre-processed.
+In this project our aim is to use several supervised machine learning techniques to develop a leaf classifier. \\
+The input of this problem is given by 14 morphological and textural features of a picture of a leaf and the output is a number associated to its species. The classifiers that we present have been trained on an already preprocessed dataset provided by \cite{silva} that comprises 40 different plant species.
 
-
-\section{Assessment and performance indexes}
-In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation ensuring that each class is represented in each fold. We have trained different classification models that have been compared using as performances indexes the Accuracy and the FPR and FNR of each class.
+\section{Assessment and performance indexes}\label{2}
+In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation (CV) making sure that each class is represented in each fold. We trained different classification models that have been compared using as performance indexes the Accuracy and the False Positive Rate (FPR) and False Negative Rate (FNR) of each class.
 
 \section{Proposed solution}
-The leaf identification problem is a multiclass classification problem with numerical predictors. The first thing that has to be noted about data is that of the 40 species present in the original dataset, only 30 (the ones whose leaves are labeled as "simple" in Silva \cite{silva}) are present in the numeric dataset we are actually using to train our classifier. We focused on two classes of methods: tree based methods and support vector machines (SVM).
-\\In particular, regarding tree based methods, we tuned and tested a simple decision tree and then tried to improve its performances by using tree aggregation methods, such as random forest and boosting. 
-\\SVM are a very powerful machine learning tool, natively built for binary classification: to adapt them to our multiclass task we opted for the 'one versus one' approach, in which each class is evaluated against all other classes and the final predicted class is the one that won more individual comparisons. We tried three different kernels to build our SVM: linear, radial and polynomial and tuned their hyperparameters.
-
+The leaf identification problem is a multiclass classification problem with numerical predictors. We focused on two classes of methods: tree based methods and support vector machines (SVM).
+In particular, regarding tree based methods, we relied on a simple decision tree and then tried to improve its performances by using tree aggregation methods, such as random forest. This classifier aggregates independent views by making use of multiple decision trees. 
+\\On the other hand, SVM are a very powerful machine learning tool, natively built for binary classification: to adapt them to our multiclass task we opted for the $\textit{one versus one}$ approach, in which all classes are compared pairwise and the final prediction is the most frequently predicted class. We tried three different kernels to build our SVM: linear, radial and polynomial and tuned their hyperparameters.
+\\Once we trained these classifiers, we compared them by means of the performance indexes presented in Section \ref{2}.
 
 \section{Experimental evaluation}
 
 \subsection{Data}
-
+The first thing that has to be noted about data is that of the 40 species present in the original dataset, only 30 (the ones whose leaves are defined as $\textit{simple}$ in Silva \cite{silva}) are present in the numeric dataset we are actually using to train our classifiers
 \subsection{Procedure}
 
 \subsection{Results and discussion}
