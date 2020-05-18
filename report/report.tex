@@ -49,7 +49,9 @@ The input of this problem is given by 14 morphological and textural features of 
 In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation ensuring that each class is represented in each fold. We have trained different classification models that have been compared using as performances indexes the Accuracy and the FPR and FNR of each class.
 
 \section{Proposed solution}
-
+The leaf identification problem is a multiclass classification problem with numerical predictors. The first thing that has to be noted about data is that of the 40 species present in the original dataset, only 30 (the ones whose leaves are labeled as "simple" in Silva \cite{silva}) are present in the numeric dataset we are actually using to train our classifier. We focused on two classes of methods: tree based methods and support vector machines (SVM).
+\\In particular, regarding tree based methods, we tuned and tested a simple decision tree and then tried to improve its performances by using tree aggregation methods, such as random forest and boosting. 
+\\SVM are a very powerful machine learning tool, natively built for binary classification: to adapt them to our multiclass task we opted for the 'one versus one' approach, in which each class is evaluated against all other classes and the final predicted class is the one that won more individual comparisons. We tried three different kernels to build our SVM: linear, radial and polynomial and tuned their hyperparameters.
 
 
 \section{Experimental evaluation}
