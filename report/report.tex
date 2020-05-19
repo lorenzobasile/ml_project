@@ -15,6 +15,7 @@
 \usepackage{breakurl}
 \usepackage[breaklinks]{hyperref}
 \usepackage[font=small]{caption}
+\usepackage{multicol}
 
 \title{Introduction to Machine Learning project:\\ Leaf identification}
 \author[1]{Lorenzo Basile}
@@ -56,7 +57,31 @@ In particular, regarding tree based methods, we relied on a simple decision tree
 \section{Experimental evaluation}
 
 \subsection{Data}
-The first thing that has to be noted about data is that of the 40 species present in the original dataset, only 30 (the ones whose leaves are defined as $\textit{simple}$ in Silva \cite{silva}) are present in the numeric dataset we are actually using to train our classifiers
+The dataset used for solving this leaf identification problem is made up of 360 leaf observations of the following 16 features:
+\begin{multicols}{3}
+	\begin{enumerate}
+		\item Class (Species)
+		\item Specimen Number
+		\item Eccentricity
+		\item Aspect Ratio
+		\item Elongation
+		\item Solidity
+		\item Stochastic Convexity
+		\item Isoperimetric Factor
+		\item Maximal Indentation Depth
+		\item Lobedness
+		\item Average Intensity
+		\item Average Contrast
+		\item Smoothness
+		\item Third moment
+		\item Uniformity
+		\item Entropy
+	\end{enumerate}
+\end{multicols}
+\noindent As explained by \cite{silva}, the first variable "Class" encodes each leaf of the dataset to its species, which is between 40 different ones. However, as first thing that we noted about data is that of the 40 Species present in the original dataset only 30 (the ones whose leaves are defined as $\textit{simple}$ in Silva \cite{silva}) are present.
+\\For what concerning the other attributes, from 3 to 9 they indicate properties that characterize the shape of the leaf, while from 10 to 16 they refer to texture peculiarities of the leaf. A full and precise explanation of these variables can be found in \cite{silva}.
+\\Finally, the attribute "Specimen Number" represent an index that catalogues all the leaves that belong to a given species. For that reason we thought that this variable was not a useful predictor for our classifier and, as consequence, we decided to discard it during the preprocessing phase.
+
 \subsection{Procedure}
 
 \subsection{Results and discussion}
