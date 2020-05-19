@@ -7,10 +7,11 @@ library(dplyr)
 library(ggplot2)
 library(knitr) 
 library(mltest)
+library(rpart)
 
 
 csv <- read.csv("leaf.csv",header=F,sep = ",")
-colnames(csv) <- c("Class","SpecimenNumber","Eccentricity","AspectRatio","Elongation","Solidity","StochasticConvexity","IsoperimetricFactor","Maximal IndentationDepth","Lobedness","AverageIntensity","AverageContrast","Smoothness","ThirdMoment","Uniformity","Entropy")
+colnames(csv) <- c("Class","SpecimenNumber","Eccentricity","AspectRatio","Elongation","Solidity","StochasticConvexity","IsoperimetricFactor","MaximalIndentationDepth","Lobedness","AverageIntensity","AverageContrast","Smoothness","ThirdMoment","Uniformity","Entropy")
 data = subset(csv, select = -SpecimenNumber ) #il numero del campione non serve
 classes <- c(seq(1,40))
 classes %in% data$Class
@@ -40,9 +41,9 @@ fnr_svml <- array(0, dim = 30)
 fpr_svmp <- array(0, dim = 30)
 fnr_svmp <- array(0, dim = 30)
 
-b_acc <- array(NA,dim = 5)
-b_fpr <- array(0, dim = 30)
-b_fnr <- array(0, dim = 30)
+t_acc <- array(NA,dim = 5)
+t_fpr <- array(0, dim = 30)
+t_fnr <- array(0, dim = 30)
 
 
 for (fold in 1:5) {
@@ -119,18 +120,17 @@ for (fold in 1:5) {
   fpr_svmp<- fpr_svmp + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
   fnr_svmp<- fnr_svmp + ml_test(ypred,ytest,output.as.table = FALSE)$FNR 
   
-  #BOOSTING
+  #DECISION TREE
   
-  gbmGrid <- expand.grid(n.trees=100, interaction.depth=5, shrinkage=0.1, n.minobsinnode = 10)
-  gbmFit <- train(Class ~., data = training_set, method = "gbm", trControl = fitControl, tuneGrid = gbmGrid, metric = "Accuracy")
-  print(gbmFit)
-  ypred <- predict(gbmFit, n.trees = gbmFit$finalModel$n.trees, interaction.depth=gbmFit$finalModel$interaction.depth, shrinkage=gbmFit$finalModel$shrinkage, n.minobsinnode=gbmFit$finalModel$n.minobsinnode, xtest)
-  b_acc[fold] <- sum((ytest==ypred)/length(ytest))
-  b_fpr<- b_fpr + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
-  b_fnr<- b_fnr + ml_test(ypred,ytest,output.as.table = FALSE)$FNR
-  
-  
+  treeGrid <- expand.grid(maxdepth=(1:20))
+  treeFit <- train(Class ~., data = training_set, method = "rpart2", trControl = fitControl, tuneGrid = treeGrid, metric = "Accuracy", minsplit=2)
+  print(treeFit)
+  ypred <- predict(treeFit, xtest)
+  t_acc[fold] <- sum((ytest==ypred)/length(ytest))
+  t_fpr<- t_fpr + ml_test(ypred,ytest,output.as.table = FALSE)$FPR
+  t_fnr<- t_fnr + ml_test(ypred,ytest,output.as.table = FALSE)$FNR
 }
+
 #RF
 rf_fpr <- rf_fpr/5
 rf_fnr <- rf_fnr/5
@@ -172,18 +172,18 @@ svmp_final_acc
 
 fpfn_svmp <- data.frame(Species, FPR_svmp, FNR_svmp)
 fpfn_svmp
-#B
 
-b_final_acc <- mean(b_acc)
-b_final_acc
+#DT
+t_final_acc <- mean(t_acc)
+t_final_acc
 
-b_fpr <- b_fpr/5
-b_fnr <- b_fnr/5
-b_FNR<-c(b_fnr)
-b_FPR <- c(b_fpr)
-fpfn <- data.frame(Species, b_FPR, b_FNR)
-fpfn
-plot(varImp(gbmFit))
+t_fpr <- t_fpr/5
+t_fnr <- t_fnr/5
+t_FNR<-c(t_fnr)
+t_FPR <- c(t_fpr)
+fpfn_tree <- data.frame(Species, t_FPR, t_FNR)
+fpfn_tree
+plot(varImp(treeFit))
 
 
 
