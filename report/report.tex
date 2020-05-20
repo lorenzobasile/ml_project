@@ -48,7 +48,7 @@ The input of this problem is given by 14 morphological and textural features of 
 \section{Assessment and performance indexes}\label{2}
 In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation (CV) making sure that each class is represented in each fold. We trained different classification models that have been compared using as performance indexes the Accuracy and the False Positive Rate (FPR) and False Negative Rate (FNR) of each class.
 
-\section{Proposed solution}
+\section{Proposed solution}\label{3}
 The leaf identification problem is a multiclass classification problem with numerical predictors. We focused on two classes of methods: tree based methods and support vector machines (SVM).
 In particular, regarding tree based methods, we relied on a simple decision tree and then tried to improve its performances by using tree aggregation methods, such as random forest. This classifier aggregates independent views by making use of multiple decision trees. 
 \\On the other hand, SVM are a very powerful machine learning tool, natively built for binary classification: to adapt them to our multiclass task we opted for the $\textit{one versus one}$ approach, in which all classes are compared pairwise and the final prediction is the most frequently predicted class. We tried three different kernels to build our SVM: linear, radial and polynomial and tuned their hyperparameters.
@@ -78,11 +78,15 @@ The dataset used for solving this leaf identification problem is made up of 360 
 		\item Entropy
 	\end{enumerate}
 \end{multicols}
-\noindent As explained by \cite{silva}, the first variable "Class" encodes each leaf of the dataset to its species, which is between 40 different ones. However, as first thing that we noted about data is that of the 40 Species present in the original dataset only 30 (the ones whose leaves are defined as $\textit{simple}$ in Silva \cite{silva}) are present.
+\noindent As explained by \cite{silva}, the first variable "Class" encodes each leaf of the dataset to its species, which is between 40 different ones. However, as first thing that we noted about data is that of the 40 Species present in the original dataset only 30 (the ones whose leaves are defined as $\textit{simple}$ in Silva \cite{silva}) are present. %troppe citazioni a silva
 \\For what concerning the other attributes, from 3 to 9 they indicate properties that characterize the shape of the leaf, while from 10 to 16 they refer to texture peculiarities of the leaf. A full and precise explanation of these variables can be found in \cite{silva}.
 \\Finally, the attribute "Specimen Number" represent an index that catalogues all the leaves that belong to a given species. For that reason we thought that this variable was not a useful predictor for our classifier and, as consequence, we decided to discard it during the preprocessing phase.
 
 \subsection{Procedure}
+For all methods presented in Section \ref{3}, we tuned their hyperparameters during training. In particular, this was done by performing a nested 5-fold CV on the training set (80\% of the original dataset) at each step.
+\\Regarding decision tree, we tuned its maximum depth, while for random forest we tuned the parameter $m$, which represents the number of features taken into account by each tree, keeping in mind the widely accepted golden standard of fixing it to $\sqrt{p}$ and not allowing it to deviate much from this value.
+\\When it comes to SVM, we tuned for all kernels the cost of misclassifications, for radial kernel only we tuned the smoothing parameter and for polynomial kernel only we tuned the polynomial degree and the scale parameter.
+\\For each iteration, after parameters had been tuned with the internal CV loop, the techniques were tested on a completely unseen test set, which accounts for 20\% of the original dataset.
 
 \subsection{Results and discussion}
 
