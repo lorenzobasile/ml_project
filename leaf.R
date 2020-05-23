@@ -8,20 +8,29 @@ library(ggplot2)
 library(knitr) 
 library(mltest)
 library(rpart)
+library(e1071)
 
 
 csv <- read.csv("leaf.csv",header=F,sep = ",")
 colnames(csv) <- c("Class","SpecimenNumber","Eccentricity","AspectRatio","Elongation","Solidity","StochasticConvexity","IsoperimetricFactor","MaximalIndentationDepth","Lobedness","AverageIntensity","AverageContrast","Smoothness","ThirdMoment","Uniformity","Entropy")
-data = subset(csv, select = -SpecimenNumber ) #il numero del campione non serve
+data = subset(csv, select = -SpecimenNumber) #il numero del campione non serve
+#data = subset(data, select = -Smoothness)
+#data = subset(data, select = -AverageContrast)
+#data = subset(data, select = -MaximalIndentationDepth)
 classes <- c(seq(1,40))
 classes %in% data$Class
 data$Class=as.factor(data$Class)
+
+corr_matrix <- cor(data)
+corr_matrix
+corrplot(corr_matrix, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45)
 
 # classes 16,17,18,19,20,21,37,38,39,40 are not present in the dataset, thus we cannot train the 
 # classifier on these classes and these classes will be dropped from the possible outputs
 # we are left with 30 possible species (classes)
 
-set.seed(1) 
+set.seed(Sys.time()) 
 data_folds <- fold(data, k = 5, cat_col = "Class")
 
 #------------------------RANDOM FOREST--------------------------------------
@@ -52,7 +61,7 @@ for (fold in 1:5) {
   test_set <- data[data_folds$.folds == fold,]
   
   # x_test, y_test
-  xtest<-test_set[2:15]
+  xtest<-test_set[2:12]
   ytest<-test_set[[1]]
   
   # setting seed
@@ -142,6 +151,9 @@ rf_final_acc
 Species <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36)
 rf_fpfn <- data.frame(Species, rf_FPR, rf_FNR)
 rf_fpfn
+
+plot(varImp(rF_fit))
+
 #SVMR
 fpr_svmr <- fpr_svmr/5
 fnr_svmr <- fnr_svmr/5

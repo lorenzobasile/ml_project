@@ -10,6 +10,7 @@
 \usepackage{subfig}
 \usepackage{multicol}
 \usepackage{booktabs}
+\usepackage{pbox}
 \usepackage{url}
 \def\UrlBreaks{\do\/\do-}
 \usepackage{breakurl}
@@ -46,7 +47,7 @@ In this project our aim is to use several supervised machine learning techniques
 The input of this problem is given by 14 morphological and textural features of a picture of a leaf and the output is a number associated to its species. The classifiers that we present have been trained on an already preprocessed dataset provided by \cite{silva} that comprises 40 different plant species.
 
 \section{Assessment and performance indexes}\label{2}
-In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation (CV) making sure that each class is represented in each fold. We trained different classification models that have been compared using as performance indexes the Accuracy and the False Positive Rate (FPR) and False Negative Rate (FNR) of each class.
+In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation (CV) making sure that each class is represented in each fold. We trained different classification models that have been compared using as performance index the Accuracy and the False Positive Rate (FPR) and the False Negative Rate (FNR) for each class.
 
 \section{Proposed solution}\label{3}
 The leaf identification problem is a multiclass classification problem with numerical predictors. We focused on two classes of methods: tree based methods and support vector machines (SVM).
@@ -56,8 +57,8 @@ In particular, regarding tree based methods, we relied on a simple decision tree
 
 \section{Experimental evaluation}
 
-\subsection{Data}
-The dataset used for solving this leaf identification problem is made up of 360 leaf observations of the following 16 features:
+\subsection{Data}\label{dat}
+The dataset used for solving this leaf identification problem is made up of 340 leaf observations of the following 16 features:
 \begin{multicols}{3}
 	\begin{enumerate}
 		\item Class (Species)
@@ -78,17 +79,211 @@ The dataset used for solving this leaf identification problem is made up of 360 
 		\item Entropy
 	\end{enumerate}
 \end{multicols}
-\noindent As explained by \cite{silva}, the first variable "Class" encodes each leaf of the dataset to its species, which is between 40 different ones. However, as first thing that we noted about data is that of the 40 Species present in the original dataset only 30 (the ones whose leaves are defined as $\textit{simple}$ in Silva \cite{silva}) are present. %troppe citazioni a silva
-\\For what concerning the other attributes, from 3 to 9 they indicate properties that characterize the shape of the leaf, while from 10 to 16 they refer to texture peculiarities of the leaf. A full and precise explanation of these variables can be found in \cite{silva}.
-\\Finally, the attribute "Specimen Number" represent an index that catalogues all the leaves that belong to a given species. For that reason we thought that this variable was not a useful predictor for our classifier and, as consequence, we decided to discard it during the preprocessing phase.
+\noindent As explained in \cite{silva}, the variable “Class”  assigns each leaf of the dataset to one of $40$ different species encoded as a number. However, we noticed that  of the 40 Species found in the original dataset only 30 (the ones whose leaves are defined as $\textit{simple}$ in \cite{silva}) are present.
+Thus, our models will not be able to classify these missing species.
+\\ Concerning the other attributes, from 3 to 10 they indicate properties that characterize the shape of the leaf, while from 11 to 16 they refer to texture peculiarities of the image. A full and precise explanation of these variables can be found in \cite{silva}.
+\\The attribute "Specimen Number" represents the number of leaf specimens available by species. Hence we thought that this variable was not a useful predictor for our classifiers and we decided to discard it during the preprocessing phase.
+\\In order to verify the degree of correlation among the predictors, we produced the correlation matrix and we observed that some variables are highly correlated. We compared the test performance of our classifiers with all predictors and without some redundant ones.
 
 \subsection{Procedure}
-For all methods presented in Section \ref{3}, we tuned their hyperparameters during training. In particular, this was done by performing a nested 5-fold CV on the training set (80\% of the original dataset) at each step.
+We implemented our classifiers using the $R$ programming language.
+\\In order to tune the hyperparameters and measure the test performance of the methods presented in Section \ref{3}, we performed two nested 5-fold CV. 
+In particular, we divided the data into 5 folds ensuring that each class is represented in each fold. Then at each iteration of the outer CV, we assigned one fold to test set and the others to training and we tuned the hyperparameters with an inner 5-fold CV on the corresponding training set. After that, inside the outer CV we assessed the actual performance of our tuned models on the unseen test fold (20\% of the original dataset). Finally, we averaged on the 5 collected values of the Accuracy computed for each model.
 \\Regarding decision tree, we tuned its maximum depth, while for random forest we tuned the parameter $m$, which represents the number of features taken into account by each tree, keeping in mind the widely accepted golden standard of fixing it to $\sqrt{p}$ and not allowing it to deviate much from this value.
-\\When it comes to SVM, we tuned for all kernels the cost of misclassifications, for radial kernel only we tuned the smoothing parameter and for polynomial kernel only we tuned the polynomial degree and the scale parameter.
-\\For each iteration, after parameters had been tuned with the internal CV loop, the techniques were tested on a completely unseen test set, which accounts for 20\% of the original dataset.
+\\When it comes to SVM, we tuned for all kernels the cost of misclassifications and the other kernel specific parameters for radial and polynomial kernel.
+
 
 \subsection{Results and discussion}
+As stated in Section \ref{dat}, we trained the classifiers using all predictors and then without $3$ redundant variables: $\textit{Smoothness}$, $\textit{Average Contrast}$ and $\textit{Maximal}$ $\textit{Indentation Depth}$. 
+\\We present the results in terms of Accuracy of the models with all predictors in table \ref{table1}. 
+\begin{table}[ht]
+ \centering
+\begin{tabular}{ |c|c|} \hline
+ & Accuracy \\
+\hline
+Decision Tree & 0.51 \\ 
+\hline
+ Random Forest & 0.78  \\ 
+\hline
+ SVM (radial kernel) & 0.76 \\ 
+\hline
+ SVM (linear kernel) & 0.76 \\ 
+\hline
+ SVM (polynomial kernel) & 0.75 \\ 
+\hline
+\end{tabular}
+\caption{Accuracy results with all predictors.}\label{table1}
+\end{table}
+
+As we expected, decision tree has the worst Accuracy and it does not perform well enough. Tree aggregation methods like random forest produce instead a quite reliable classifier with a $0.78$ Accuracy. 
+\\Even though SVM takes a completely different approach to the classification problem, not based on decision trees but on separating hyperplanes, it yields similar results in terms of Accuracy. Moreover, we observed that the kernel choice does not impact too much on performance.
+\\In table \ref{table2}, we report the Accuracy obtained training the classifiers without the $3$ predictors previously mentioned.
+\newpage
+
+\begin{table}[ht]
+ \centering
+\begin{tabular}{ |c|c|} \hline
+ &  Accuracy \\
+\hline
+Decision Tree & 0.51 \\ 
+\hline
+ Random Forest & 0.78 \\ 
+\hline
+ SVM (radial kernel) & 0.74 \\ 
+\hline
+ SVM (linear kernel) & 0.78  \\ 
+\hline
+ SVM (polynomial kernel) & 0.74 \\ 
+\hline
+\end{tabular}
+\caption{Accuracy results without $3$ predictors.}\label{table2}
+\end{table}
+
+As observed, removing these predictors does not affect the results; however, since for the most accurate models (random forest and SVM with linear kernel) we noticed that the Accuracy increases or stays the same, we think that this design choice makes sense because it reduces the computational cost while ensuring the same Accuracy.
+\\Finally, we present in table \ref{tablefp} the FPR and the FNR of each class for random forest and SVM with linear kernel trained without the $3$ predictors. 
+
+\begin{table}
+\centering
+\begin{minipage}[t]{5cm}
+\begin{tabular}{ |c|c|c| } \hline
+Species & FPR & FNR \\
+\hline
+1 & 0.017 & 0.167 \\ 
+\hline
+2 & 0.020 & 0.200 \\ 
+\hline
+ 3 & 0.017 & 0.300 \\ 
+\hline
+ 4 & 0.020 & 0.500 \\ 
+\hline
+ 5 & 0.000 & 0.067 \\ 
+\hline
+ 6 & 0.004 & 0.000 \\ 
+\hline
+ 7 & 0.011 & 0.300 \\ 
+\hline
+ 8 & 0.000 & 0.000 \\ 
+\hline
+ 9 & 0.024 & 0.233 \\ 
+\hline
+ 10 & 0.004 & 0.233 \\ 
+\hline
+ 11 & 0.000 & 0.000 \\ 
+\hline
+ 12 & 0.012 & 0.367 \\ 
+\hline
+ 13 & 0.013 & 0.333 \\ 
+\hline
+ 14 & 0.024 & 0.533 \\ 
+\hline
+ 15 & 0.000 & 0.000 \\ 
+\hline
+ 22 & 0.008 & 0.133 \\ 
+\hline
+ 23 & 0.000 & 0.067 \\ 
+\hline
+ 24 & 0.020 & 0.333 \\ 
+\hline
+ 25 & 0.004 & 0.300 \\ 
+\hline
+ 26 & 0.023 & 0.700 \\ 
+\hline
+ 27 & 0.007 & 0.367 \\ 
+\hline
+ 28 & 0.023 & 0.400 \\ 
+\hline
+ 29 & 0.003 & 0.067 \\ 
+\hline
+ 30 & 0.000 & 0.100 \\ 
+\hline
+ 31 &  0.000 & 0.200 \\ 
+\hline
+ 32 & 0.015 & 0.367 \\ 
+\hline
+ 33 & 0.007 & 0.167 \\ 
+\hline
+ 34 & 0.008 & 0.000 \\ 
+\hline
+ 35 & 0.008 & 0.367 \\ 
+\hline
+ 36 & 0.000 & 0.100 \\ 
+\hline
+\end{tabular}
+\caption{FPR and FNR for each class obtained with SVM linear kernel classifier.}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{5cm}
+\begin{tabular}{ |c|c|c| } \hline
+Species & FPR & FNR \\
+\hline
+1 & 0.010 & 0.267 \\ 
+\hline
+2 & 0.021 & 0.600 \\ 
+\hline
+ 3 & 0.004 & 0.400 \\ 
+\hline
+ 4 & 0.005 & 0.700 \\ 
+\hline
+ 5 &  0.005 & 0.000 \\ 
+\hline
+ 6 & 0.000 & 0.000 \\ 
+\hline
+ 7 & 0.015 & 0.200 \\ 
+\hline
+ 8 & 0.000 & 0.000 \\ 
+\hline
+ 9 & 0.022 & 0.300 \\ 
+\hline
+ 10 & 0.013 & 0.067 \\ 
+\hline
+ 11 & 0.003 & 0.000 \\ 
+\hline
+ 12 & 0.009 & 0.300 \\ 
+\hline
+ 13 & 0.016 & 0.333 \\ 
+\hline
+ 14 & 0.011 & 0.267 \\ 
+\hline
+ 15 & 0.000 & 0.000 \\ 
+\hline
+ 22 & 0.017 & 0.367 \\ 
+\hline
+ 23 & 0.000 & 0.100 \\ 
+\hline
+ 24 & 0.031 & 0.367 \\ 
+\hline
+ 25 & 0.000 & 0.100 \\ 
+\hline
+ 26 & 0.015 & 0.233 \\ 
+\hline
+ 27 & 0.012 & 0.233 \\ 
+\hline
+ 28 & 0.018 & 0.300 \\ 
+\hline
+ 29 & 0.003 & 0.067 \\ 
+\hline
+ 30 & 0.009& 0.100 \\ 
+\hline
+ 31 &  0.005 & 0.100 \\ 
+\hline
+ 32 & 0.026 & 0.533 \\ 
+\hline
+ 33 & 0.010 & 0.533 \\ 
+\hline
+ 34 & 0.004 & 0.100 \\ 
+\hline
+ 35 & 0.007 & 0.267 \\ 
+\hline
+ 36 & 0.000 & 0.100 \\ 
+\hline
+\end{tabular}
+\caption{FPR and FNR for each class obtained with random forest classifier.}
+\end{minipage}
+\end{table}
+
+We can see from FNR values that both classifiers do not perform well on class $4$; this may be due to the fact that there are only $8$ observations for this species.
+\\Moreover, we notice that there is some imbalance between the two classifiers regarding to FNR of some specific classes. SVM is more sensitive than random forest on classes $2$ and $33$. On the other hand, random forest seems to be more sensitive than SVM on classes $14$ and $26$.
+
 
 
 
