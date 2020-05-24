@@ -62,22 +62,32 @@ Regarding tree based methods, we relied on a simple decision tree and then tried
 The dataset used for solving this leaf identification problem is made up of 340 leaf observations of the following 16 features:
 \begin{multicols}{4}
 	\begin{enumerate}
-		\item Class (Species)
-		\item Specimen Number
-		\item Eccentricity
-		\item Aspect Ratio
-		\item Elongation
-		\item Solidity
-		\item Stochastic Convexity
-		\item Isoperimetric Factor
-		\item Maximal Indentation Depth
-		\item Lobedness
-		\item Average Intensity
-		\item Average Contrast
-		\item Smoothness
-		\item Third moment
-		\item Uniformity
-		\item Entropy
+		
+		\footnotesize{\item Class (Species)}
+		\footnotesize{\item Specimen Number}
+		\footnotesize{\item Eccentricity}
+		\footnotesize{\item Aspect Ratio}
+		
+		\columnbreak
+		
+		\footnotesize{\item Elongation}
+		\footnotesize{\item Solidity}
+		\footnotesize {\item Stochastic Convexity}
+		\footnotesize{\item Isoperimetric Factor}
+		
+		\columnbreak
+		
+		\footnotesize{\item Max. Indentation Depth}
+		\footnotesize{\item Lobedness}
+		\footnotesize{\item Average\\ Intensity}
+		\footnotesize{\item Average Contrast}
+		
+		\columnbreak
+		
+		\footnotesize{\item Smoothness}
+		\footnotesize{\item Third moment}
+		\footnotesize{\item Uniformity}
+		\footnotesize{\item Entropy}
 	\end{enumerate}
 \end{multicols}
 \noindent As explained in \cite{silva}, the variable “Class”  assigns each leaf of the dataset to one of $40$ different species encoded as a number. However, we noticed that  of the 40 Species found in the original dataset only 30 (the ones whose leaves are defined as $\textit{simple}$ in \cite{silva}) are present.
