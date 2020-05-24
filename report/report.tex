@@ -90,8 +90,7 @@ Thus, our models will not be able to classify these missing species.
 In order to tune the hyperparameters and measure the test performance of the methods presented in Section \ref{3}, we performed two nested 5-fold CV. 
 In particular, we divided the data into 5 folds ensuring that each class is represented in each fold. Then at each iteration of the outer CV, we assigned one fold to test set and the others to training and we tuned the hyperparameters with an inner 5-fold CV on the corresponding training set. After that, inside the outer CV we assessed the actual performance of our tuned models on the unseen test fold (20\% of the original dataset). Finally, we averaged on the 5 collected values of the Accuracy computed for each model.
 \\Regarding decision tree, we tuned its maximum depth, while for random forest we tuned the parameter $m$, which represents the number of features taken into account by each tree, keeping in mind the widely accepted golden standard of fixing it to $\sqrt{p}$ and not allowing it to deviate much from this value.
-\\When it comes to SVM, we tuned for all kernels the cost of misclassifications and the other kernel specific parameters for radial and polynomial kernel.
-
+\\When it comes to SVM, we tuned the regularization parameter for all kernels, the degree and scale factor for polynomial kernel and the scaling parameter $\sigma$ for radial kernel.
 
 \subsection{Results and discussion}
 As stated in Section \ref{dat}, we trained the classifiers using all predictors and then without $3$ redundant variables: $\textit{Smoothness}$, $\textit{Average Contrast}$ and $\textit{Maximal}$ $\textit{Indentation Depth}$. 
@@ -223,7 +222,7 @@ Species & FPR & FNR & & Species & FPR & FNR \\
 
 \end{table}
 
-We can see from FNR values that both classifiers do not perform well on class $4$; this may be due to the fact that there are only $8$ observations for this species. Moreover, we notice that there is some imbalance between the two classifiers regarding to FNR of some specific classes. SVM is more sensitive than random forest on classes $2$ and $33$. On the other hand, random forest seems to be more sensitive than SVM on classes $14$ and $26$.
+We can see from FNR values that both classifiers do not perform well on class $4$; this may be due to the fact that there are only $8$ observations for this species. Moreover, we notice that there is some serious imbalance between the two classifiers regarding to FNR of some specific classes. SVM is more sensitive than random forest on classes $2$ and $33$. On the other hand, random forest seems to be more sensitive than SVM on classes $14$ and $26$. %serious imbalance mi suona bene
 \\To conclude, random forest and SVM with linear kernel are the best solutions among the tested classifiers. However, there is no general reason to prefer one over the other since Accuracy is the same but the choice of the model may be guided by the necessity to classify some specific classes with high sensitivity.
 We could achieve better results by increasing the number of observed leaves in each class, especially for those that have very few observations.
 
