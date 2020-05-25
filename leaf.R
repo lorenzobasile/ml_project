@@ -61,7 +61,7 @@ for (fold in 1:5) {
   test_set <- data[data_folds$.folds == fold,]
   
   # x_test, y_test
-  xtest<-test_set[2:12]
+  xtest<-test_set[2:15]
   ytest<-test_set[[1]]
   
   # setting seed
@@ -131,7 +131,7 @@ for (fold in 1:5) {
   
   #DECISION TREE
   
-  treeGrid <- expand.grid(maxdepth=(1:20))
+  treeGrid <- expand.grid(maxdepth=(1:30))
   treeFit <- train(Class ~., data = training_set, method = "rpart2", trControl = fitControl, tuneGrid = treeGrid, metric = "Accuracy", minsplit=2)
   print(treeFit)
   ypred <- predict(treeFit, xtest)
