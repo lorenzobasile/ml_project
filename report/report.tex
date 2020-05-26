@@ -52,7 +52,7 @@ In order to assess how well the classifier would work if applied to unseen data,
 
 \section{Proposed solution}\label{3}
 The leaf identification problem is a multiclass classification problem with numerical predictors. We focused on two classes of methods: tree based methods and support vector machines (SVM), implemented using $\texttt{R}$ language.
-Regarding tree based methods, we relied on a simple decision tree and then tried to improve its performance by using tree aggregation methods, such as random forest. This classifier aggregates independent views by making use of multiple decision trees. 
+Regarding tree based methods, we started with a simple decision tree and then tried to improve its performance by using tree aggregation methods, such as random forest. This classifier aggregates independent views by making use of multiple decision trees. 
 \\SVM are another very powerful machine learning tool, natively built for binary classification: to adapt them to our multiclass task we opted for the $\textit{one versus one}$ approach in which all classes are compared pairwise and the final prediction is the most frequently predicted class. We chose three different kernels (linear, radial and polynomial) to build our SVM and tuned their hyperparameters.
 \\Once we trained these classifiers, we compared them by means of the performance indexes presented in Section \ref{2}.
 
@@ -92,14 +92,14 @@ The dataset used for solving this leaf identification problem is made up of 340 
 \end{multicols}
 \noindent As explained in \cite{silva}, the variable \textit{Class}  assigns each leaf of the dataset to one of $40$ different species encoded as a number. However, we noticed that  of the 40 Species found in the original dataset only 30 (the ones whose leaves are defined as \textit{simple} in \cite{silva}) are present.
 Thus, our models will not be able to classify these missing species.
-\\ Concerning the other attributes, from 3 to 10 they indicate properties that characterize the shape of the leaf, while from 11 to 16 they refer to texture peculiarities of the image. A full and precise explanation of these variables can be found in \cite{silva}. The attribute \textit{Specimen Number} represents the number of leaf specimens available by species. Hence we thought that this variable was not a useful predictor for our classifiers and we decided to discard it during the preprocessing phase.
-\\In order to verify the degree of correlation among the predictors, we produced the correlation matrix and we observed that some variables are highly correlated. We compared the test performance of our classifiers with all predictors and without some redundant ones.
+\\ Concerning the other attributes, from 3 to 10 they indicate properties that characterize the shape of the leaf, while from 11 to 16 they refer to texture peculiarities of the image. A full and precise explanation of these variables can be found in \cite{silva}. The attribute \textit{Specimen Number} represents the index of the leaf inside its class. Hence, we thought that this variable was not a useful predictor for our classifiers and we decided to discard it during the preprocessing phase.
+\\In order to verify the degree of correlation among the predictors, we produced the correlation matrix and we observed that some variables are highly correlated. For this reason, we compared the test performance of our classifiers with all predictors and without some redundant ones.
 
 \subsection{Procedure}
 In order to tune the hyperparameters and measure the test performance of the methods presented in Section \ref{3}, we performed two nested 5-fold CV loops. 
-In particular, we divided the dataset into 5 folds ensuring that each class is represented in each fold. Then at each iteration of the outer CV, we assigned one fold to test set and the others to training and we tuned the hyperparameters with an inner 5-fold CV on the corresponding training set. After that, we evaluated the performance indexes of our tuned models on the unseen test fold (20\% of the original dataset). Finally, we averaged on the values of Accuracy, FPR and FNR collected at each iteration of the outer CV.
-\\Regarding decision tree, we tuned its maximum depth, while for random forest we tuned the parameter $m$, which represents the number of features taken into account by each tree, keeping in mind the widely accepted golden standard of fixing it to $\sqrt{p}$ (as stated in \cite{book}) and not allowing it to deviate much from this value.
-\\When it comes to SVM, we tuned the regularization parameter for all kernels, the degree and scale factor for polynomial kernel and the scaling parameter $\sigma$ for radial kernel.
+In particular, we divided the dataset into 5 folds ensuring that each class is represented in each fold. Then, at each iteration of the outer CV, we assigned one fold to test set and the others to training set and we tuned the hyperparameters with an inner 5-fold CV on the current training set. After that, we evaluated the performance indexes of our tuned models on the unseen test fold (20\% of the original dataset). Finally, we averaged on the values of Accuracy, FPR and FNR collected at each iteration of the outer CV \cite{cv}.
+\\Regarding decision tree, we tuned its maximum depth, while for random forest we tuned the parameter $m$, which represents the number of features taken into account by each tree, keeping in mind the widely accepted golden standard of fixing it to $\sqrt{p}$ \cite{book} and not allowing it to deviate much from this value.
+\\When it comes to SVM, we tuned the regularization parameter for all kernels, the degree and the scale factor for polynomial kernel and the scaling parameter $\sigma$ for radial kernel.
 
 \subsection{Results and discussion}
 As stated in Section \ref{dat}, we trained the classifiers using all predictors and then without $3$ redundant variables: \textit{Smoothness}, \textit{Average Contrast} and \textit{Maximal} \textit{Indentation Depth}. 
@@ -237,7 +237,7 @@ We can see from FNR values that both classifiers do not perform well on class $4
 
 
 \newpage
-\bibliographystyle{plain}
+\bibliographystyle{unsrt}
 \bibliography{report}
 
 
