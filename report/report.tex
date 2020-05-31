@@ -42,17 +42,17 @@
 
 
 \section{Problem statement}
-Leaf identification is the process of matching an unknown observed leaf to its proper scientific name. Modern automatic recognition systems can provide the experts of this field with a fast and efficient classification tool. 
+Leaf identification is the process of matching an unknown observed leaf to its species' proper scientific name. Modern automatic recognition systems can provide the experts of this field with a fast and efficient classification tool. 
 
 In this project our aim is to use several supervised machine learning techniques to develop a leaf classifier. \\
-The input of this problem is given by 14 morphological and textural features of a picture of a leaf and the output is a number associated to its species. The classifiers that we present have been trained on an already preprocessed dataset provided by \cite{silva} that comprises 40 different plant species.
+The input of this problem is given by 8 morphological features of a leaf and 6 textural features of its picture and the output is a number associated to its species. The classifiers that we present have been trained on an already preprocessed dataset provided by \cite{silva} that comprises 40 different plant species.
 
 \section{Assessment and performance indexes}\label{2}
-In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation (CV) making sure that each class is represented in each fold. We trained different classification models that have been compared using as performance indexes the Accuracy and, for each class, the False Positive Rate (FPR) and the False Negative Rate (FNR).
+In order to assess how well the classifier would work if applied to unseen data, we used a $5$-fold cross validation (CV) making sure that each class is represented in each fold. We trained different classification models that have been evaluated using as performance indexes the Accuracy and, for each class, the False Positive Rate (FPR) and the False Negative Rate (FNR).
 
 \section{Proposed solution}\label{3}
-The leaf identification problem is a multiclass classification problem with numerical predictors. We focused on two classes of methods: tree based methods and support vector machines (SVM), implemented using $\texttt{R}$ language.
-Regarding tree based methods, we started with a simple decision tree and then tried to improve its performance by using tree aggregation methods, such as random forest. This classifier aggregates independent views by making use of multiple decision trees. 
+Leaf identification is a multiclass classification problem with numerical predictors. To solve it, we selected two classes of methods: tree based methods and support vector machines (SVM), both implemented using $\texttt{R}$ language.
+\\Regarding tree based methods, we started with a simple decision tree and then tried to improve its performance by using tree aggregation methods, such as random forest. This classifier aggregates independent views by making use of multiple decision trees. 
 \\SVM are another very powerful machine learning tool, natively built for binary classification: to adapt them to our multiclass task we opted for the $\textit{one versus one}$ approach in which all classes are compared pairwise and the final prediction is the most frequently predicted class. We chose three different kernels (linear, radial and polynomial) to build our SVM and tuned their hyperparameters.
 \\Once we trained these classifiers, we compared them by means of the performance indexes presented in Section \ref{2}.
 
@@ -91,13 +91,13 @@ The dataset used for solving this leaf identification problem is made up of 340 
 	\end{enumerate}
 \end{multicols}
 \noindent As explained in \cite{silva}, the variable \textit{Class}  assigns each leaf of the dataset to one of $40$ different species encoded as a number. However, we noticed that  of the 40 Species found in the original dataset only 30 (the ones whose leaves are defined as \textit{simple} in \cite{silva}) are present.
-Thus, our models will not be able to classify these missing species.
+For this reason, our models will not be able to classify these missing species.
 \\ Concerning the other attributes, from 3 to 10 they indicate properties that characterize the shape of the leaf, while from 11 to 16 they refer to texture peculiarities of the image. A full and precise explanation of these variables can be found in \cite{silva}. The attribute \textit{Specimen Number} represents the index of the leaf inside its class. Hence, we thought that this variable was not a useful predictor for our classifiers and we decided to discard it during the preprocessing phase.
-\\In order to verify the degree of correlation among the predictors, we produced the correlation matrix and we observed that some variables are highly correlated. For this reason, we compared the test performance of our classifiers with all predictors and without some redundant ones.
+\\In order to verify the degree of correlation among the predictors, we produced the correlation matrix and we observed that some variables are highly correlated. Thus, we compared the test performance of our classifiers with all predictors and without some redundant ones.
 
 \subsection{Procedure}
 In order to tune the hyperparameters and measure the test performance of the methods presented in Section \ref{3}, we performed two nested 5-fold CV loops. 
-In particular, we divided the dataset into 5 folds ensuring that each class is represented in each fold. Then, at each iteration of the outer CV, we assigned one fold to test set and the others to training set and we tuned the hyperparameters with an inner 5-fold CV on the current training set. After that, we evaluated the performance indexes of our tuned models on the unseen test fold (20\% of the original dataset). Finally, we averaged on the values of Accuracy, FPR and FNR collected at each iteration of the outer CV \cite{cv}.
+In particular, we divided the dataset into 5 folds ensuring that each class is represented in each fold. Then, at each iteration of the outer CV, we assigned one fold to test set and the others to training set, on which we tuned the hyperparameters with an inner 5-fold CV. After that, we evaluated the performance indexes of our tuned models on the unseen test fold (20\% of the original dataset). Finally, we averaged over the values of Accuracy, FPR and FNR collected at each iteration of the outer CV \cite{cv}.
 \\Regarding decision tree, we tuned its maximum depth, while for random forest we tuned the parameter $m$, which represents the number of features taken into account by each tree, keeping in mind the widely accepted golden standard of fixing it to $\sqrt{p}$ \cite{book} and not allowing it to deviate much from this value.
 \\When it comes to SVM, we tuned the regularization parameter for all kernels, the degree and the scale factor for polynomial kernel and the scaling parameter $\sigma$ for radial kernel.
 
@@ -125,7 +125,7 @@ Decision Tree & 0.51 \\
 
 As we expected, decision tree has by far the worst Accuracy; tree aggregation methods like random forest produce instead a quite reliable classifier with $0.78$ Accuracy. 
 \\Even though SVM takes a completely different approach from random forest to the classification problem, not based on decision trees but on separating hyperplanes, it yields similar results in terms of Accuracy. Moreover, we observed that the kernel choice does not impact too much on performance.
-\\In table \ref{table2}, we report the Accuracy obtained training the classifiers without the $3$ predictors previously mentioned.
+\\In table \ref{table2}, we report the Accuracy obtained training the classifiers without the $3$ aforementioned predictors.
 \newpage
 
 \begin{table}[ht]
@@ -147,8 +147,8 @@ Decision Tree & 0.51 \\
 \caption{Accuracy results without $3$ predictors.}\label{table2}
 \end{table}
 
-As observed, removing these predictors does not affect the results significantly; however, since for the most accurate models (random forest and SVM with linear kernel) we noticed that the Accuracy increases or stays the same, we think that this design choice makes sense because it reduces the computational cost while ensuring at least the same Accuracy.
-\\Finally, we present in tables \ref{table3} and \ref{table4} the FPR and the FNR of each class for random forest and SVM with linear kernel trained without the $3$ predictors. 
+It can be observed that removing these predictors the results are not affected significantly; however, since for the most accurate models (random forest and SVM with linear kernel) we noticed that without these variables the Accuracy increases or stays the same, we think that this design choice makes sense because it reduces the computational cost while ensuring at least the same Accuracy.
+\\Finally, we present in tables \ref{table3} and \ref{table4} the FPR and the FNR of each class for SVM with linear kernel and random forest, both trained without the $3$ predictors. 
 
 \begin{table}[h]\footnotesize
 \begin{minipage}[]{7cm}
@@ -231,8 +231,8 @@ Species & FPR & FNR & & Species & FPR & FNR \\
 
 \end{table}
 
-We can see from FNR values that both classifiers do not perform well on class $4$; this may be due to the fact that there are only $8$ observations for this species. Moreover, we notice that there is some serious imbalance between the two classifiers regarding to FNR of some specific classes. SVM is more sensitive than random forest on classes $2$ and $33$. On the other hand, random forest is more sensitive than SVM on classes $14$ and $26$. 
-\\To conclude, random forest and SVM with linear kernel are the best solutions among the tested classifiers. There is no general reason to prefer one over the other since Accuracy is the same but the choice of the model may be guided by the necessity to classify some specific classes with high sensitivity.
+We can see from FNR values that both classifiers do not perform well on class $4$; this may be due to the fact that there are only $8$ observations for this species. Moreover, we notice that there is some serious imbalance between the two classifiers regarding the FNR of some specific classes. SVM is more sensitive than random forest on classes $2$ and $33$. On the other hand, random forest is more sensitive than SVM on classes $14$ and $26$. 
+\\To conclude, random forest and SVM with linear kernel are the best solutions to this problem among the tested classifiers. There is no general reason to prefer one over the other since Accuracy is the same but the choice of the model may be guided by the necessity to classify some specific classes with high sensitivity.
 \\Better results could be achieved by increasing the number of observed leaves in each class, especially for those that have very few observations.
 
 
